@@ -20,6 +20,6 @@ public class ConnectToServerScript : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        SceneManager.LoadScene("LobbyScene");
+        PhotonNetwork.LoadLevel("LobbyScene");
     }
 }

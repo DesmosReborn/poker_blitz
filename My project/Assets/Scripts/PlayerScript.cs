@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.Intrinsics;
 using UnityEngine;
@@ -36,6 +36,8 @@ public class PlayerScript : MonoBehaviour
     private List<float> comboMults;
     public float currComboMult;
 
+    private StyleMeterManager smm;
+
     private List<string> comboStrings = new List<string>() { "F", "E", "D", "C", "B", "A", "S", "SS", "SSS" };
     public string currComboString;
 
@@ -69,10 +71,11 @@ public class PlayerScript : MonoBehaviour
         currComboMult = comboMults[Mathf.Max(0, right)];
         currComboString = comboStrings[Mathf.Max(0, right)];
 
-        gm.updateStyleMeter(currComboString, view.ViewID);
+        smm.updateStyleMeter(currComboString);
     }
 
-    public void takeDamage(float damage)
+    [PunRPC]
+    public void RPC_TakeDamage(float damage)
     {
         if (!attackedThisFrame) {
             currHP -= damage;
@@ -90,6 +93,7 @@ public class PlayerScript : MonoBehaviour
     {
         view = GetComponent<PhotonView>();
         gm = GameObject.FindObjectOfType<GameManager>();
+        smm = GetComponent<StyleMeterManager>();
         comboThresholds = new List<float>() { comboFThreshold, comboEThreshold, comboDThreshold, comboCThreshold, comboBThreshold, comboAThreshold, comboSThreshold, comboSSThreshold, comboSSSThreshold };
         comboMults = new List<float>() { comboFMult, comboEMult, comboDMult, comboCMult, comboBMult, comboAMult, comboSMult, comboSSMult, comboSSSMult };
         currPlayCD = 0;
@@ -97,15 +101,16 @@ public class PlayerScript : MonoBehaviour
         currComboMult = 1;
         currComboString = comboStrings[0];
         currComboScoreDecreaseCD = comboScoreDecreaseCD;
-        gm.updateStyleMeter(currComboString, view.ViewID);
+        smm.updateStyleMeter(currComboString);
         currHP = maxHP;
         healthbar = GetComponent<HealthbarScript>();
+        healthbar.Initialize(view);
         healthbar.SetMaxHealth(maxHP);
 
-        if (!view.IsMine)
+        if (view.IsMine)
         {
-            myCamera.enabled = false;
-            myUI.enabled = false;
+            myCamera.gameObject.SetActive(true);
+            myUI.gameObject.SetActive(true);
         }
     }
 
@@ -116,17 +121,17 @@ public class PlayerScript : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                if (hand.hand[4] != null)
+                if (hand.hand[0] != null)
                 {
-                    hand.hand[4].toggleSelected();
+                    hand.hand[0].toggleSelected();
                     hand.updateHandType();
                 }
             }
             if (Input.GetKeyDown(KeyCode.W))
             {
-                if (hand.hand[3] != null)
+                if (hand.hand[1] != null)
                 {
-                    hand.hand[3].toggleSelected();
+                    hand.hand[1].toggleSelected();
                     hand.updateHandType();
                 }
             }
@@ -140,17 +145,17 @@ public class PlayerScript : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.R))
             {
-                if (hand.hand[1] != null)
+                if (hand.hand[3] != null)
                 {
-                    hand.hand[1].toggleSelected();
+                    hand.hand[3].toggleSelected();
                     hand.updateHandType();
                 }
             }
             if (Input.GetKeyDown(KeyCode.T))
             {
-                if (hand.hand[0] != null)
+                if (hand.hand[4] != null)
                 {
-                    hand.hand[0].toggleSelected();
+                    hand.hand[4].toggleSelected();
                     hand.updateHandType();
                 }
             }
@@ -180,7 +185,8 @@ public class PlayerScript : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.Space) && currPlayCD <= 0)
             {
-                hand.playHand();
+                PhotonView handView = hand.GetComponent<PhotonView>();
+                handView.RPC("RPC_PlayHand", RpcTarget.AllBuffered);
                 currPlayCD = playCD;
             }
             currPlayCD -= Time.deltaTime;
@@ -188,7 +194,7 @@ public class PlayerScript : MonoBehaviour
             if (currComboScoreDecreaseCD < 0)
             {
                 comboScore = Mathf.Max(0, comboScore * (1 - comboScorePercentDecrease) - comboScoreFlatDecrease);
-                gm.updateStyleMeter(currComboString, view.ViewID);
+                smm.updateStyleMeter(currComboString);
                 currComboScoreDecreaseCD = comboScoreDecreaseCD;
             }
         }

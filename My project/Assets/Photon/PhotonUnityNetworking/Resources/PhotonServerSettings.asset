@@ -28,7 +28,7 @@ MonoBehaviour:
     AuthMode: 0
     EnableLobbyStatistics: 0
     NetworkLogging: 1
-  DevRegion: 
+  DevRegion: cae
   PunLogging: 0
   EnableSupportLogger: 0
   RunInBackground: 1
@@ -40,6 +40,25 @@ MonoBehaviour:
   - Fire
   - RespawnSpaceship
   - AssignControl
+  - AssignOwnership
+  - RPC_AssignCardToHand
+  - RPC_Initialize
+  - RPC_RequestCardDraw
+  - RPC_InitializeAttack
+  - SetParentRPC
+  - RPC_SetCardInHand
+  - RPC_ToggleBloom
+  - RPC_DestroyAttack
+  - PlayHand
+  - RPC_PlayHand
+  - RPC_PlaceCardInHand
+  - RPC_Draw
+  - RPC_InitializeHand
+  - RPC_ReInitializeDeck
+  - RPC_RemoveCardFromDeck
+  - RPC_TakeDamage
+  - RPC_SetAttackedThisFrame
+  - RPC_UpdatePower
   DisableAutoOpenWizard: 1
   ShowSettings: 0
-  DevRegionSetOnce: 0
+  DevRegionSetOnce: 1

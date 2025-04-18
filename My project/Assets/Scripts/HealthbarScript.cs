@@ -3,12 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
+using Photon.Pun;
 
-public class HealthbarScript : MonoBehaviour
+public class HealthbarScript : MonoBehaviourPun
 {
     [SerializeField] private Slider healthSlider;
     [SerializeField] private TextMeshProUGUI healthAmount;
     private float maxHealth;
+
+    public void Initialize(PhotonView playerView)
+    {
+        if (!playerView.IsMine)
+        {
+            healthAmount.transform.localRotation = Quaternion.Euler(0, 0, 180);
+        }
+    }
 
     public void SetMaxHealth(float newMaxHealth)
     {

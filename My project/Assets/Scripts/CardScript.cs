@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.Intrinsics;
 using UnityEngine;
+using Photon.Pun;
 
-public class CardScript : MonoBehaviour
+public class CardScript : MonoBehaviourPun
 {
     public float value { get; set; }
     public string suit { get; set; }
@@ -21,17 +22,9 @@ public class CardScript : MonoBehaviour
     [SerializeField] float toggleUpDistance = 0.75f;
     [SerializeField] AudioSource selectedAudio;
     [SerializeField] AudioSource deselectedAudio;
+    [SerializeField] public Collider2D col;
 
-    private int playerID { get; set; } 
-
-    public void Initialize(float newValue, string newSuit, int newPlayerID)
-    {
-        playerID = newPlayerID;
-        value = newValue;
-        suit = newSuit;
-        Start();
-        setImage();
-    }
+    private int playerID { get; set; }
 
     // Start is called before the first frame update
     void Start()
@@ -59,6 +52,7 @@ public class CardScript : MonoBehaviour
                 deselectedAudio.Play();
                 this.gameObject.layer = LayerMask.NameToLayer("No Post");
             }
+            photonView.RPC(nameof(RPC_ToggleBloom), RpcTarget.OthersBuffered);
             Vector3 endPosition = selected
             ? transform.localPosition + new Vector3(0, toggleUpDistance, 0)
             : transform.localPosition - new Vector3(0, toggleUpDistance, 0);
@@ -147,30 +141,70 @@ public class CardScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!photonView.IsMine) return;
         if (collision.gameObject.tag == "card")
         {
-            CardScript attackCard = collision.gameObject.GetComponent<CardScript>();
-            if (playerID != attackCard.playerID)
+            PhotonView enemyCardView = collision.gameObject.GetComponent<PhotonView>();
+            if (enemyCardView == null)
             {
-                AttackScript enemyAttack = attackCard.transform.parent.gameObject.GetComponent<AttackScript>();
-                AttackScript playerAttack = this.transform.parent.gameObject.GetComponent<AttackScript>();
-                if (enemyAttack != null && playerAttack != null)
+                Debug.LogWarning("Enemy Card PhotonView not found");
+                return;
+            }
+
+            CardScript attackCard = enemyCardView.GetComponent<CardScript>();
+            if (attackCard == null)
+            {
+                Debug.LogWarning("CardScript missing on view ID" + enemyCardView.ViewID);
+                return;
+            }
+
+            if (!enemyCardView.IsMine)
+            {
+                PhotonView enemyAttackView = attackCard.transform.parent.gameObject.GetComponent<PhotonView>();
+                PhotonView playerAttackView = this.transform.parent.gameObject.GetComponent<PhotonView>();
+                AttackScript enemyAttack = enemyAttackView.GetComponent<AttackScript>();
+                AttackScript playerAttack = playerAttackView.GetComponent<AttackScript>();
+                if (enemyAttackView != null && playerAttackView != null && enemyAttack != null && playerAttack != null)
                 {
-                    playerAttack.takeDamage(enemyAttack.power);
-                    enemyAttack.takeDamage(playerAttack.power);
+                    CollisionManager.Instance.ResolveAttackCollision(playerAttack, enemyAttack);
                 }
             }
         }
 
         if (collision.gameObject.tag == "Player")
         {
-            PlayerScript player = collision.transform.parent.gameObject.GetComponent<PlayerScript>();
-            if (player.view.ViewID != playerID)
+            PhotonView playerView = collision.transform.parent.gameObject.GetComponent<PhotonView>();
+            PlayerScript player = playerView.GetComponent<PlayerScript>();
+            PhotonView attackView = this.transform.parent.gameObject.GetComponent<PhotonView>();
+            AttackScript attack = attackView.GetComponent<AttackScript>();
+            if (photonView.IsMine != playerView.IsMine && player != null && attackView != null && attack != null)
             {
-                AttackScript attack = this.transform.parent.gameObject.GetComponent<AttackScript>();
-                if (player != null && attack != null) player.takeDamage(attack.currPower);
-                if (attack != null) attack.takeDamage(attack.power);
+                CollisionManager.Instance.ResolvePlayerHit(player, attack);
             }
+        }
+    }
+
+    [PunRPC]
+    public void RPC_Initialize(float newValue, string newSuit, int newPlayerID)
+    {
+        playerID = newPlayerID;
+        value = newValue;
+        suit = newSuit;
+        sr = GetComponent<SpriteRenderer>();
+        setImage();
+    }
+
+    [PunRPC]
+    public void RPC_ToggleBloom()
+    {
+        selected = !selected;
+        if (selected)
+        {
+            this.gameObject.layer = LayerMask.NameToLayer("Post");
+        }
+        else
+        {
+            this.gameObject.layer = LayerMask.NameToLayer("No Post");
         }
     }
 }

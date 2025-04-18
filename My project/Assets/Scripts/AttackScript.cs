@@ -4,15 +4,16 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.XR;
+using Photon.Pun;
 
-public class AttackScript : MonoBehaviour
+public class AttackScript : MonoBehaviourPun
 {
     public List<CardScript> cards;
     public float power;
     public float currPower;
     private DeckScript deck;
     private PlayerScript player;
-    private bool attackedThisFrame = false;
+    [SerializeField] private bool attackedThisFrame = false;
 
     [SerializeField] float highCardMult;
     [SerializeField] float onePairMult;
@@ -52,13 +53,53 @@ public class AttackScript : MonoBehaviour
     [SerializeField] GameObject cardSpawnVFX;
     [SerializeField] TextMeshProUGUI dmgUI;
 
-    public void Initialize(List<CardScript> newCards)
+    [SerializeField] private PhotonView view;
+
+    [PunRPC]
+    private void RPC_InitializeAttack(int[] cardViewIDs, int playerViewID)
     {
         Start();
-        cards = newCards;
+        PhotonView playerView = PhotonView.Find(playerViewID);
+        if (playerView == null)
+        {
+            Debug.LogWarning("Player PhotonView not found: " + playerViewID);
+            return;
+        }
+
+        player = playerView.GetComponent<PlayerScript>();
+        if (player == null)
+        {
+            Debug.LogWarning("Player missing on view ID: " + playerViewID);
+            return;
+        }
+        deck = player.GetComponentInChildren<DeckScript>();
+        this.transform.SetParent(player.transform, false);
+
+        for (int i = 0; i < cardViewIDs.Length; i++)
+        {
+            PhotonView cardView = PhotonView.Find(cardViewIDs[i]);
+            if (cardView == null)
+            {
+                Debug.LogWarning("Card PhotonView not found: " + cardViewIDs[i]);
+                return;
+            }
+
+            CardScript card = cardView.GetComponent<CardScript>();
+            if (card == null)
+            {
+                Debug.LogWarning("CardScript missing on view ID: " + cardViewIDs[i]);
+                return;
+            }
+            cards.Add(card);
+        }
+
         power = calculateHandStrength() * player.currComboMult;
         currPower = power;
         dmgUI.text = currPower.ToString();
+        if (!playerView.IsMine)
+        {
+            dmgUI.transform.localRotation = Quaternion.Euler(0, 0, 180);
+        }
         foreach (CardScript card in cards)
         {
             card.selected = false;
@@ -67,11 +108,14 @@ public class AttackScript : MonoBehaviour
             card.transform.localPosition = new Vector3(prevX, 0, 0);
             float endRotationY = card.transform.localEulerAngles.y + 720;
             card.invokeCardAnim(endRotationY, card.transform.localPosition, card.defaultScale, card.spawnTime * 2);
+            card.col.enabled = true;
         }
     }
 
-    private void DestroyAttack()
+    [PunRPC]
+    private void RPC_DestroyAttack()
     {
+        moveSpeed = 0;
         foreach (CardScript card in cards)
         {
             GameObject vfx = Instantiate(cardSpawnVFX);
@@ -81,6 +125,36 @@ public class AttackScript : MonoBehaviour
             Vector3 endScale = new Vector3(0, card.defaultScale.y, card.defaultScale.z);
             card.invokeCardAnim(endRotationY, endPosition, Vector3.zero, card.spawnTime * 2);
             card.transform.SetParent(deck.transform, true);
+            card.transform.localPosition = Vector3.zero;
+            card.col.enabled = false;
+            deck.played.Add(card);
+        }
+        StartCoroutine(DestroyAfterDelay(0.2f));
+    }
+
+    private IEnumerator DestroyAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (photonView.IsMine)
+        {
+            PhotonNetwork.Destroy(this.gameObject);
+        }
+    }
+
+    private void DestroyAttack()
+    {
+        Debug.Log("Destroying Attack with ID " + photonView.ViewID);
+        foreach (CardScript card in cards)
+        {
+            GameObject vfx = Instantiate(cardSpawnVFX);
+            vfx.transform.position = card.transform.position;
+            float endRotationY = card.transform.localEulerAngles.y + 360;
+            Vector3 endPosition = card.transform.localPosition;
+            Vector3 endScale = new Vector3(0, card.defaultScale.y, card.defaultScale.z);
+            card.invokeCardAnim(endRotationY, endPosition, Vector3.zero, card.spawnTime * 2);
+            card.transform.SetParent(deck.transform, true);
+            card.transform.localPosition = Vector3.zero;
+            card.col.enabled = false;
             deck.played.Add(card);
         }
         Destroy(this.gameObject, 0.2f);
@@ -89,14 +163,14 @@ public class AttackScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        player = this.transform.parent.GetComponent<PlayerScript>();
-        deck = player.GetComponentInChildren<DeckScript>();
         moveSpeed = initialMoveSpeed;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!photonView.IsMine) return; // only owner moves/updates attack
+
         moveSpeed = Mathf.Clamp(moveSpeed - decayRate * Time.deltaTime, baseMoveSpeed, initialMoveSpeed);
         attackedThisFrame = false;
         move();
@@ -110,7 +184,7 @@ public class AttackScript : MonoBehaviour
         {
             handStrength += card.value;
         }
-        return getHandTypeBase() + handStrength;
+        return Mathf.Floor(getHandTypeBase() + handStrength / cards.Count);
     }
 
     private float getHandTypeMultiplier()
@@ -359,13 +433,16 @@ public class AttackScript : MonoBehaviour
 
     private void move()
     {
-        this.transform.localPosition += this.transform.up * moveSpeed * Time.deltaTime;
+        this.transform.position += this.transform.up * moveSpeed * Time.deltaTime;
     }
 
-    public void takeDamage(float damage)
+    [PunRPC]
+    public void RPC_TakeDamage(float damage)
     {
+        if (!photonView.IsMine) return;
         if (!attackedThisFrame)
         {
+            Debug.Log("Attack with ID " + photonView.ViewID + " Taking " + damage + " Damage");
             currPower -= damage;
             dmgUI.text = currPower.ToString();
             attackedThisFrame = true;
@@ -374,5 +451,12 @@ public class AttackScript : MonoBehaviour
                 DestroyAttack();
             }
         }
+    }
+
+    [PunRPC]
+    public void RPC_UpdatePower(float newPower)
+    {
+        currPower = newPower;
+        dmgUI.text = currPower.ToString();
     }
 }

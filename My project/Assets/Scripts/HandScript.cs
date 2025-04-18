@@ -1,3 +1,4 @@
+using Photon.Pun;
 using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class HandScript : MonoBehaviour
+public class HandScript : MonoBehaviourPun
 {
     public List<CardScript> hand;
     [SerializeField] private DeckScript deck;
@@ -18,14 +19,23 @@ public class HandScript : MonoBehaviour
     [SerializeField] AudioSource playHandAudio;
     [SerializeField] private Transform cardPlayPosition;
     [SerializeField] private TextMeshProUGUI handTypeUI;
+    [SerializeField] private PhotonView playerView;
 
-    private float[] positions = new float[] { -5, -2.5f, 0, 2.5f, 5 };
+    private float[] handPositions = new float[] { -5, -2.5f, 0, 2.5f, 5 };
 
     // Start is called before the first frame update
     void Start()
     {
-        hand = new List<CardScript>() { null, null, null, null, null };
+        if (!photonView.IsMine) return;
+        photonView.RPC(nameof(RPC_InitializeHand), RpcTarget.AllBuffered);
         StartCoroutine(waitDraw(drawCD));
+    }
+
+    [PunRPC]
+    private void RPC_InitializeHand()
+    {
+        hand = new List<CardScript>() { null, null, null, null, null };
+        playerView = this.transform.parent.gameObject.GetComponent<PhotonView>();
     }
 
     // Update is called once per frame
@@ -34,9 +44,10 @@ public class HandScript : MonoBehaviour
         
     }
 
-    public void playHand()
+    [PunRPC]
+    private void RPC_PlayHand()
     {
-        List<CardScript> playedCards = new List<CardScript>();
+        List<int> playedCardViewIDs = new List<int>();
         for (int i = 0; i < hand.Count; i++)
         {
             if (hand[i].selected)
@@ -49,38 +60,26 @@ public class HandScript : MonoBehaviour
                 GameObject vfx = Instantiate(cardPlayVFX);
                 vfx.transform.position = hand[i].transform.position;
                 hand[i].invokeCardAnim(endRotationY, endPosition, Vector3.zero, hand[i].playTime);
-                playedCards.Add(hand[i]);
+                playedCardViewIDs.Add(hand[i].GetComponent<PhotonView>().ViewID);
                 hand[i] = null;
             }
         }
-        if (playedCards.Count > 0)
+        if (playedCardViewIDs.Count > 0)
         {
             playHandAudio.Play();
-            GameObject newAttack = Instantiate(attackPrefab, this.transform.parent.transform);
-            newAttack.transform.localEulerAngles = cardPlayPosition.eulerAngles;
-            newAttack.transform.position = cardPlayPosition.position + Vector3.forward;
-            newAttack.GetComponent<AttackScript>().Initialize(playedCards);
-            StartCoroutine(waitDraw(drawCD));
-            updateHandType();
-        }
-    }
 
-    public void draw()
-    {
-        for (int i = 0; i < hand.Count; i++)
-        {
-            if (hand[i] == null)
+            if (photonView.IsMine)
             {
-                hand[i] = deck.draw();
-                hand[i].gameObject.GetComponent<SpriteRenderer>().sortingOrder = 10;
-                hand[i].gameObject.layer = LayerMask.NameToLayer("No Post");
-                hand[i].transform.localPosition = this.transform.localPosition + Vector3.left * positions[i];
-                GameObject vfx = Instantiate(cardSpawnVFX);
-                vfx.transform.position = hand[i].transform.position;
-                float endRotationY = hand[i].transform.localEulerAngles.y + 720;
-                hand[i].invokeCardAnim(endRotationY, hand[i].transform.localPosition, hand[i].defaultScale, hand[i].spawnTime);
-                
+                GameObject newAttack = PhotonNetwork.Instantiate(attackPrefab.name, cardPlayPosition.localPosition, cardPlayPosition.localRotation);
+                PhotonView attackView = newAttack.GetComponent<PhotonView>();
+                attackView.RPC("RPC_InitializeAttack", RpcTarget.All, playedCardViewIDs.ToArray(), playerView.ViewID);
             }
+
+            if (photonView.IsMine)
+            {
+                StartCoroutine(waitDraw(drawCD));
+            }
+            updateHandType();
         }
     }
 
@@ -88,11 +87,57 @@ public class HandScript : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
 
-        draw();
+        Draw();
+    }
+
+    private void Draw()
+    {
+        for (int i = 0; i < hand.Count; i++)
+        {
+            if (hand[i] == null)
+            {
+                CardScript drawnCard = deck.DrawCard();
+                if (drawnCard == null) return; // deck empty after recycling
+                PhotonView cardView = drawnCard.GetComponent<PhotonView>();
+                photonView.RPC(nameof(RPC_PlaceCardInHand), RpcTarget.AllBuffered, cardView.ViewID, i, photonView.ViewID);
+            }
+        }
+    }
+
+    [PunRPC]
+    private void RPC_PlaceCardInHand(int cardViewID, int slotIndex, int handViewID)
+    {
+        PhotonView cardView = PhotonView.Find(cardViewID);
+        if (cardView == null)
+        {
+            Debug.LogWarning("Card PhotonView not found: " + cardViewID);
+            return;
+        }
+
+        CardScript card = cardView.GetComponent<CardScript>();
+        if (card == null)
+        {
+            Debug.LogWarning("CardScript missing on view ID: " + cardViewID);
+            return;
+        }
+
+        PhotonView handView = PhotonView.Find(handViewID);
+        HandScript handObject = handView.GetComponent<HandScript>();
+        handObject.hand[slotIndex] = card;
+        card.transform.SetParent(this.transform, true);
+        card.transform.localPosition = handPositions[slotIndex] * Vector3.right;
+        card.transform.rotation = Quaternion.identity;
+        card.gameObject.layer = LayerMask.NameToLayer("No Post");
+        card.GetComponent<SpriteRenderer>().sortingOrder = 10;
+        GameObject vfx = Instantiate(cardSpawnVFX);
+        vfx.transform.position = card.transform.position;
+        float endRotationY = card.transform.localEulerAngles.y + 720;
+        card.invokeCardAnim(endRotationY, card.transform.localPosition, card.defaultScale, card.spawnTime);
     }
 
     public void updateHandType()
     {
+        if (!photonView.IsMine) return;
         List<CardScript> selected = new List<CardScript>();
         for (int i = 0; i < hand.Count; i++)
         {
