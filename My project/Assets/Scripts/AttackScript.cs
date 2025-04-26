@@ -13,37 +13,27 @@ public class AttackScript : MonoBehaviourPun
     public float currPower;
     private DeckScript deck;
     private PlayerScript player;
-    [SerializeField] private bool attackedThisFrame = false;
+    private bool attackedThisFrame = false;
 
-    [SerializeField] float highCardMult;
-    [SerializeField] float onePairMult;
-    [SerializeField] float twoPairMult;
-    [SerializeField] float threeKindMult;
-    [SerializeField] float straightMult;
-    [SerializeField] float flushMult;
-    [SerializeField] float fullHouseMult;
-    [SerializeField] float fourKindMult;
-    [SerializeField] float straightFlushMult;
+    private float highCardBase;
+    private float onePairBase;
+    private float twoPairBase;
+    private float threeKindBase;
+    private float straightBase;
+    private float flushBase;
+    private float fullHouseBase;
+    private float fourKindBase;
+    private float straightFlushBase;
 
-    [SerializeField] float highCardBase;
-    [SerializeField] float onePairBase;
-    [SerializeField] float twoPairBase;
-    [SerializeField] float threeKindBase;
-    [SerializeField] float straightBase;
-    [SerializeField] float flushBase;
-    [SerializeField] float fullHouseBase;
-    [SerializeField] float fourKindBase;
-    [SerializeField] float straightFlushBase;
-
-    [SerializeField] float highCardComboScore;
-    [SerializeField] float onePairComboScore;
-    [SerializeField] float twoPairComboScore;
-    [SerializeField] float threeKindComboScore;
-    [SerializeField] float straightComboScore;
-    [SerializeField] float flushComboScore;
-    [SerializeField] float fullHouseComboScore;
-    [SerializeField] float fourKindComboScore;
-    [SerializeField] float straightFlushComboScore;
+    private float highCardComboScore;
+    private float onePairComboScore;
+    private float twoPairComboScore;
+    private float threeKindComboScore;
+    private float straightComboScore;
+    private float flushComboScore;
+    private float fullHouseComboScore;
+    private float fourKindComboScore;
+    private float straightFlushComboScore;
 
     [SerializeField] float baseMoveSpeed;
     [SerializeField] float initialMoveSpeed;
@@ -54,11 +44,13 @@ public class AttackScript : MonoBehaviourPun
     [SerializeField] TextMeshProUGUI dmgUI;
 
     [SerializeField] private PhotonView view;
+    public bool isAIControlled = false;
 
     [PunRPC]
-    private void RPC_InitializeAttack(int[] cardViewIDs, int playerViewID)
+    private void RPC_InitializeAttack(int[] cardViewIDs, int playerViewID, bool newIsAIControlled=false)
     {
         Start();
+        isAIControlled = newIsAIControlled;
         PhotonView playerView = PhotonView.Find(playerViewID);
         if (playerView == null)
         {
@@ -96,7 +88,7 @@ public class AttackScript : MonoBehaviourPun
         power = calculateHandStrength() * player.currComboMult;
         currPower = power;
         dmgUI.text = currPower.ToString();
-        if (!playerView.IsMine)
+        if (!playerView.IsMine || isAIControlled)
         {
             dmgUI.transform.localRotation = Quaternion.Euler(0, 0, 180);
         }
@@ -164,12 +156,30 @@ public class AttackScript : MonoBehaviourPun
     void Start()
     {
         moveSpeed = initialMoveSpeed;
+        highCardBase = HandValueManager.Instance.highCardBase;
+        onePairBase = HandValueManager.Instance.onePairBase;
+        twoPairBase = HandValueManager.Instance.twoPairBase;
+        threeKindBase = HandValueManager.Instance.threeKindBase;
+        straightBase = HandValueManager.Instance.straightBase;
+        flushBase = HandValueManager.Instance.flushBase;
+        fullHouseBase = HandValueManager.Instance.fullHouseBase;
+        fourKindBase = HandValueManager.Instance.fourKindBase;
+        straightFlushBase = HandValueManager.Instance.straightFlushBase;
+        highCardComboScore = HandValueManager.Instance.highCardComboScore;
+        onePairComboScore = HandValueManager.Instance.onePairComboScore;
+        twoPairComboScore = HandValueManager.Instance.twoPairComboScore;
+        threeKindComboScore = HandValueManager.Instance.threeKindComboScore;
+        straightComboScore = HandValueManager.Instance.straightComboScore;
+        flushComboScore = HandValueManager.Instance.flushComboScore;
+        fullHouseComboScore = HandValueManager.Instance.fullHouseComboScore;
+        fourKindComboScore = HandValueManager.Instance.fourKindComboScore;
+        straightFlushComboScore = HandValueManager.Instance.straightFlushComboScore;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!photonView.IsMine) return; // only owner moves/updates attack
+        if (!photonView.IsMine && !isAIControlled) return; // only owner moves/updates attack
 
         moveSpeed = Mathf.Clamp(moveSpeed - decayRate * Time.deltaTime, baseMoveSpeed, initialMoveSpeed);
         attackedThisFrame = false;
@@ -178,8 +188,7 @@ public class AttackScript : MonoBehaviourPun
 
     private float calculateHandStrength()
     {
-        float handTypeMultiplier = getHandTypeMultiplier();
-        float handStrength = 0;
+        float handStrength = 1;
         foreach (CardScript card in cards)
         {
             handStrength += card.value;
@@ -187,131 +196,9 @@ public class AttackScript : MonoBehaviourPun
         return Mathf.Floor(getHandTypeBase() + handStrength / cards.Count);
     }
 
-    private float getHandTypeMultiplier()
-    {
-        List<float> ranks = new List<float>();
-        List<string> suits = new List<string>();
-        int blackJokerCount = 0;
-        int redJokerCount = 0;
-
-        foreach (CardScript card in cards)
-        {
-            if (card.value == 15)
-            {
-                if (card.suit == "red") redJokerCount++;
-                if (card.suit == "black") blackJokerCount++;
-            }
-            else
-            {
-                ranks.Add(card.value);
-                suits.Add(card.suit);
-            }
-        }
-
-        ranks.Sort();
-
-        Dictionary<float, int> rankCounts = new Dictionary<float, int>();
-        foreach (float rank in ranks)
-        {
-            if (rankCounts.ContainsKey(rank))
-                rankCounts[rank]++;
-            else
-                rankCounts[rank] = 1;
-        }
-
-        // Check for a flush (all suits the same)
-        bool isFlush = false;
-
-        // Check for a straight
-        bool isStraight = false;
-
-        if (cards.Count == 5)
-        {
-            var suitGroups = suits.GroupBy(suit => suit).ToDictionary(g => g.Key, g => g.Count());
-            string bestFlushSuit = suitGroups.OrderByDescending(g => g.Value).FirstOrDefault().Key;
-            int flushCount = suitGroups.ContainsKey(bestFlushSuit) ? suitGroups[bestFlushSuit] : 0;
-
-            flushCount += (blackJokerCount + redJokerCount);
-            isFlush = flushCount >= 5;
-
-            int gaps = 0;
-            for (int i = 1; i < ranks.Count; i++)
-            {
-                float diff = ranks[i] - ranks[i - 1];
-                if (Mathf.Abs(diff - 1) > 0.01f)
-                {
-                    gaps += (int)(diff - 1);
-                }
-            }
-            isStraight = (gaps <= (blackJokerCount + redJokerCount));
-        }
-
-        while (blackJokerCount > 0 || redJokerCount > 0)
-        {
-            if (rankCounts.Count > 0)
-            {
-                float mostCommonRank = rankCounts.OrderByDescending(kvp => kvp.Value).First().Key;
-                rankCounts[mostCommonRank]++;
-            }
-            else
-            {
-                rankCounts[15f] = blackJokerCount + redJokerCount;
-            }
-
-            if (blackJokerCount > 0) blackJokerCount--;
-            else if (redJokerCount > 0) redJokerCount--;
-        }
-
-        // Find the highest count of any rank
-        int maxCount = rankCounts.Values.Max();
-
-        if (isFlush && isStraight)
-        { 
-            player.updateComboScore(straightFlushComboScore);
-            return straightFlushMult;
-        } // Straight Flush
-        if (maxCount == 4) 
-        { 
-            player.updateComboScore(fourKindComboScore);
-            return fourKindMult;
-        } // Four of a Kind
-        if (maxCount == 3 && rankCounts.Count == 2) 
-        {
-            player.updateComboScore(fullHouseComboScore);
-            return fullHouseMult;
-        } // Full House
-        if (isFlush)
-        {
-            player.updateComboScore(flushComboScore);
-            return flushMult;
-        } // Flush
-        if (isStraight)
-        {
-            player.updateComboScore(straightComboScore);
-            return straightMult;
-        } // Straight
-        if (maxCount == 3)
-        { 
-            player.updateComboScore(threeKindComboScore);
-            return threeKindMult; 
-        } // Three of a Kind
-        if (maxCount == 2 && rankCounts.Count <= cards.Count - 2) 
-        { 
-            player.updateComboScore(twoPairComboScore);
-            return twoPairMult;
-        } // Two Pair
-        if (maxCount == 2) 
-        {
-            player.updateComboScore(onePairComboScore);;
-            return onePairMult;
-        } // One Pair
-        player.updateComboScore(highCardComboScore);
-        return highCardMult;// High Card
-    }
-
     private float getHandTypeBase()
     {
-        List<float> ranks = new List<float>();
+        List<int> ranks = new List<int>();
         List<string> suits = new List<string>();
         int blackJokerCount = 0;
         int redJokerCount = 0;
@@ -321,115 +208,136 @@ public class AttackScript : MonoBehaviourPun
             if (card.value == 15)
             {
                 if (card.suit == "red") redJokerCount++;
-                if (card.suit == "black") blackJokerCount++;
+                else if (card.suit == "black") blackJokerCount++;
             }
             else
             {
-                ranks.Add(card.value);
+                ranks.Add((int)card.value);
                 suits.Add(card.suit);
             }
         }
 
-        ranks.Sort();
+        int totalJokers = blackJokerCount + redJokerCount;
 
-        Dictionary<float, int> rankCounts = new Dictionary<float, int>();
-        foreach (float rank in ranks)
-        {
-            if (rankCounts.ContainsKey(rank))
-                rankCounts[rank]++;
-            else
-                rankCounts[rank] = 1;
-        }
+        bool isFlush = CheckFlush(suits, totalJokers);
+        bool isStraight = CheckStraight(ranks, totalJokers);
 
-        // Check for a flush (all suits the same)
-        bool isFlush = false;
-
-        // Check for a straight
-        bool isStraight = false;
-
-        if (cards.Count == 5)
-        {
-            var suitGroups = suits.GroupBy(suit => suit).ToDictionary(g => g.Key, g => g.Count());
-            string bestFlushSuit = suitGroups.OrderByDescending(g => g.Value).FirstOrDefault().Key;
-            int flushCount = suitGroups.ContainsKey(bestFlushSuit) ? suitGroups[bestFlushSuit] : 0;
-
-            flushCount += (blackJokerCount + redJokerCount);
-            isFlush = flushCount >= 5;
-
-            int gaps = 0;
-            for (int i = 1; i < ranks.Count; i++)
-            {
-                float diff = ranks[i] - ranks[i - 1];
-                if (Mathf.Abs(diff - 1) > 0.01f)
-                {
-                    gaps += (int)(diff - 1);
-                }
-            }
-            isStraight = (gaps <= (blackJokerCount + redJokerCount));
-        }
-
-        while (blackJokerCount > 0 || redJokerCount > 0)
-        {
-            if (rankCounts.Count > 0)
-            {
-                float mostCommonRank = rankCounts.OrderByDescending(kvp => kvp.Value).First().Key;
-                rankCounts[mostCommonRank]++;
-            }
-            else
-            {
-                rankCounts[15f] = blackJokerCount + redJokerCount;
-            }
-
-            if (blackJokerCount > 0) blackJokerCount--;
-            else if (redJokerCount > 0) redJokerCount--;
-        }
-
-        // Find the highest count of any rank
+        // Build rank histogram and simulate joker assignment
+        Dictionary<int, int> rankCounts = GetRankCountsWithJokers(ranks, totalJokers);
         int maxCount = rankCounts.Values.Max();
 
+        // Determine hand strength
         if (isFlush && isStraight)
         {
             player.updateComboScore(straightFlushComboScore);
             return straightFlushBase;
-        } // Straight Flush
+        }
         if (maxCount == 4)
         {
             player.updateComboScore(fourKindComboScore);
             return fourKindBase;
-        } // Four of a Kind
+        }
         if (maxCount == 3 && rankCounts.Count == 2)
         {
             player.updateComboScore(fullHouseComboScore);
             return fullHouseBase;
-        } // Full House
+        }
         if (isFlush)
         {
             player.updateComboScore(flushComboScore);
             return flushBase;
-        } // Flush
+        }
         if (isStraight)
         {
             player.updateComboScore(straightComboScore);
             return straightBase;
-        } // Straight
+        }
         if (maxCount == 3)
         {
             player.updateComboScore(threeKindComboScore);
             return threeKindBase;
-        } // Three of a Kind
-        if (maxCount == 2 && rankCounts.Count <= cards.Count - 2)
+        }
+        if (maxCount == 2 && rankCounts.Values.Count(v => v == 2) == 2)
         {
             player.updateComboScore(twoPairComboScore);
             return twoPairBase;
-        } // Two Pair
+        }
         if (maxCount == 2)
         {
-            player.updateComboScore(onePairComboScore); ;
+            player.updateComboScore(onePairComboScore);
             return onePairBase;
-        } // One Pair
+        }
+
         player.updateComboScore(highCardComboScore);
-        return highCardBase;// High Card
+        return highCardBase;
     }
+
+    // ----------- Helper Methods -----------
+
+    private bool CheckFlush(List<string> suits, int jokerCount)
+    {
+        if (suits.Count == 0) return jokerCount >= 5;
+
+        var suitCounts = suits.GroupBy(s => s).ToDictionary(g => g.Key, g => g.Count());
+        return suitCounts.Any(kvp => kvp.Value + jokerCount >= 5);
+    }
+
+    private bool CheckStraight(List<int> ranks, int jokerCount)
+    {
+        var uniqueRanks = ranks.Distinct().OrderBy(r => r).ToList();
+        for (int start = 2; start <= 10; start++)
+        {
+            int gaps = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                if (!uniqueRanks.Contains(start + i)) gaps++;
+            }
+            if (gaps <= jokerCount) return true;
+        }
+
+        // Check for ace-low straight: A-2-3-4-5
+        if (uniqueRanks.Contains(14)) // Ace
+        {
+            List<int> lowAceWindow = new List<int> { 1, 2, 3, 4, 5 };
+            int gaps = 0;
+            foreach (int val in lowAceWindow)
+            {
+                if (!uniqueRanks.Contains(val == 1 ? 14 : val)) // treat Ace as 1
+                    gaps++;
+            }
+            if (gaps <= jokerCount) return true;
+        }
+
+        return false;
+    }
+
+    private Dictionary<int, int> GetRankCountsWithJokers(List<int> ranks, int jokerCount)
+    {
+        var rankCounts = new Dictionary<int, int>();
+        foreach (var r in ranks)
+        {
+            if (!rankCounts.ContainsKey(r))
+                rankCounts[r] = 1;
+            else
+                rankCounts[r]++;
+        }
+
+        // Greedily assign jokers to most frequent ranks to improve hand strength
+        for (int i = 0; i < jokerCount; i++)
+        {
+            if (rankCounts.Count == 0)
+            {
+                rankCounts[2] = 1; // Assign arbitrary rank
+                continue;
+            }
+
+            int target = rankCounts.OrderByDescending(kvp => kvp.Value).First().Key;
+            rankCounts[target]++;
+        }
+
+        return rankCounts;
+    }
+
 
     private void move()
     {
@@ -439,7 +347,7 @@ public class AttackScript : MonoBehaviourPun
     [PunRPC]
     public void RPC_TakeDamage(float damage)
     {
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine && !isAIControlled) return;
         if (!attackedThisFrame)
         {
             Debug.Log("Attack with ID " + photonView.ViewID + " Taking " + damage + " Damage");

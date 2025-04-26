@@ -20,13 +20,14 @@ public class HandScript : MonoBehaviourPun
     [SerializeField] private Transform cardPlayPosition;
     [SerializeField] private TextMeshProUGUI handTypeUI;
     [SerializeField] private PhotonView playerView;
+    public bool isAIControlled = false;
 
     private float[] handPositions = new float[] { -5, -2.5f, 0, 2.5f, 5 };
 
     // Start is called before the first frame update
     void Start()
     {
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine && !isAIControlled) return;
         photonView.RPC(nameof(RPC_InitializeHand), RpcTarget.AllBuffered);
         StartCoroutine(waitDraw(drawCD));
     }
@@ -72,7 +73,7 @@ public class HandScript : MonoBehaviourPun
             {
                 GameObject newAttack = PhotonNetwork.Instantiate(attackPrefab.name, cardPlayPosition.localPosition, cardPlayPosition.localRotation);
                 PhotonView attackView = newAttack.GetComponent<PhotonView>();
-                attackView.RPC("RPC_InitializeAttack", RpcTarget.All, playedCardViewIDs.ToArray(), playerView.ViewID);
+                attackView.RPC("RPC_InitializeAttack", RpcTarget.All, playedCardViewIDs.ToArray(), playerView.ViewID, isAIControlled);
             }
 
             if (photonView.IsMine)
@@ -137,7 +138,7 @@ public class HandScript : MonoBehaviourPun
 
     public void updateHandType()
     {
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine && !isAIControlled) return;
         List<CardScript> selected = new List<CardScript>();
         for (int i = 0; i < hand.Count; i++)
         {

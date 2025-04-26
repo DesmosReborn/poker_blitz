@@ -23,6 +23,7 @@ public class CardScript : MonoBehaviourPun
     [SerializeField] AudioSource selectedAudio;
     [SerializeField] AudioSource deselectedAudio;
     [SerializeField] public Collider2D col;
+    public bool isAIControlled = false;
 
     private int playerID { get; set; }
 
@@ -141,7 +142,7 @@ public class CardScript : MonoBehaviourPun
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine && !isAIControlled) return;
         if (collision.gameObject.tag == "card")
         {
             PhotonView enemyCardView = collision.gameObject.GetComponent<PhotonView>();
@@ -158,7 +159,7 @@ public class CardScript : MonoBehaviourPun
                 return;
             }
 
-            if (!enemyCardView.IsMine)
+            if (!enemyCardView.IsMine || attackCard.isAIControlled)
             {
                 PhotonView enemyAttackView = attackCard.transform.parent.gameObject.GetComponent<PhotonView>();
                 PhotonView playerAttackView = this.transform.parent.gameObject.GetComponent<PhotonView>();
@@ -177,7 +178,7 @@ public class CardScript : MonoBehaviourPun
             PlayerScript player = playerView.GetComponent<PlayerScript>();
             PhotonView attackView = this.transform.parent.gameObject.GetComponent<PhotonView>();
             AttackScript attack = attackView.GetComponent<AttackScript>();
-            if (photonView.IsMine != playerView.IsMine && player != null && attackView != null && attack != null)
+            if ((photonView.IsMine != playerView.IsMine || player.isAI != isAIControlled) && player != null && attackView != null && attack != null)
             {
                 CollisionManager.Instance.ResolvePlayerHit(player, attack);
             }
@@ -185,12 +186,13 @@ public class CardScript : MonoBehaviourPun
     }
 
     [PunRPC]
-    public void RPC_Initialize(float newValue, string newSuit, int newPlayerID)
+    public void RPC_Initialize(float newValue, string newSuit, int newPlayerID, bool newIsAIControlled=false)
     {
         playerID = newPlayerID;
         value = newValue;
         suit = newSuit;
         sr = GetComponent<SpriteRenderer>();
+        isAIControlled = newIsAIControlled;
         setImage();
     }
 

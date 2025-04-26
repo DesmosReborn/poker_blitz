@@ -145,6 +145,7 @@ MonoBehaviour:
   selectedAudio: {fileID: 5651131736508649945}
   deselectedAudio: {fileID: 6915388920897456249}
   col: {fileID: 3115778514760054515}
+  isAIControlled: 0
 --- !u!212 &6889771243143293956
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -480,7 +481,6 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 0}
   - {fileID: -2744372240394722874}
   sceneViewId: 0
   InstantiationId: 0

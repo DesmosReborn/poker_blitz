@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Burst.Intrinsics;
 using UnityEngine;
 using Photon.Pun;
-public class PlayerScript : MonoBehaviour
+public class PlayerScript : MonoBehaviourPun
 {
     private GameManager gm;
     [SerializeField] private HandScript hand;
@@ -52,6 +52,8 @@ public class PlayerScript : MonoBehaviour
 
     private HealthbarScript healthbar;
     [SerializeField] private Canvas myUI;
+    [SerializeField] public bool isAI = false;
+    private AIPlayerScript ai;
 
     public void updateComboScore(float score)
     {
@@ -71,7 +73,10 @@ public class PlayerScript : MonoBehaviour
         currComboMult = comboMults[Mathf.Max(0, right)];
         currComboString = comboStrings[Mathf.Max(0, right)];
 
-        smm.updateStyleMeter(currComboString);
+        if (!isAI) 
+        {
+            smm.updateStyleMeter(currComboString);
+        }
     }
 
     [PunRPC]
@@ -96,108 +101,130 @@ public class PlayerScript : MonoBehaviour
         smm = GetComponent<StyleMeterManager>();
         comboThresholds = new List<float>() { comboFThreshold, comboEThreshold, comboDThreshold, comboCThreshold, comboBThreshold, comboAThreshold, comboSThreshold, comboSSThreshold, comboSSSThreshold };
         comboMults = new List<float>() { comboFMult, comboEMult, comboDMult, comboCMult, comboBMult, comboAMult, comboSMult, comboSSMult, comboSSSMult };
-        currPlayCD = 0;
+        currPlayCD = playCD;
         comboScore = 0;
         currComboMult = 1;
         currComboString = comboStrings[0];
         currComboScoreDecreaseCD = comboScoreDecreaseCD;
-        smm.updateStyleMeter(currComboString);
         currHP = maxHP;
         healthbar = GetComponent<HealthbarScript>();
         healthbar.Initialize(view);
         healthbar.SetMaxHealth(maxHP);
 
-        if (view.IsMine)
+        if (view.IsMine && !isAI)
         {
             myCamera.gameObject.SetActive(true);
             myUI.gameObject.SetActive(true);
+            smm.updateStyleMeter(currComboString);
+        }
+        if (isAI)
+        {
+            ai = GetComponent<AIPlayerScript>();
+
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (view.IsMine)
+        if (isAI)
         {
-            if (Input.GetKeyDown(KeyCode.Q))
+            if (currPlayCD <= 0)
             {
-                if (hand.hand[0] != null)
-                {
-                    hand.hand[0].toggleSelected();
-                    hand.updateHandType();
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                if (hand.hand[1] != null)
-                {
-                    hand.hand[1].toggleSelected();
-                    hand.updateHandType();
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                if (hand.hand[2] != null)
-                {
-                    hand.hand[2].toggleSelected();
-                    hand.updateHandType();
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                if (hand.hand[3] != null)
-                {
-                    hand.hand[3].toggleSelected();
-                    hand.updateHandType();
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                if (hand.hand[4] != null)
-                {
-                    hand.hand[4].toggleSelected();
-                    hand.updateHandType();
-                }
-            }
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                if (hand.hand[4] != null)
-                {
-                    hand.hand[4].toggleSelected();
-                }
-                if (hand.hand[3] != null)
-                {
-                    hand.hand[3].toggleSelected();
-                }
-                if (hand.hand[2] != null)
-                {
-                    hand.hand[2].toggleSelected();
-                }
-                if (hand.hand[1] != null)
-                {
-                    hand.hand[1].toggleSelected();
-                }
-                if (hand.hand[0] != null)
-                {
-                    hand.hand[0].toggleSelected();
-                }
-                hand.updateHandType();
-            }
-            if (Input.GetKeyDown(KeyCode.Space) && currPlayCD <= 0)
-            {
-                PhotonView handView = hand.GetComponent<PhotonView>();
-                handView.RPC("RPC_PlayHand", RpcTarget.AllBuffered);
-                currPlayCD = playCD;
+                isAIPlayHand();
+                currPlayCD = playCD * 1.3f;
             }
             currPlayCD -= Time.deltaTime;
-            currComboScoreDecreaseCD -= Time.deltaTime;
-            if (currComboScoreDecreaseCD < 0)
+        }
+        else
+        {
+            if (view.IsMine)
             {
-                comboScore = Mathf.Max(0, comboScore * (1 - comboScorePercentDecrease) - comboScoreFlatDecrease);
-                smm.updateStyleMeter(currComboString);
-                currComboScoreDecreaseCD = comboScoreDecreaseCD;
+                if (Input.GetKeyDown(KeyCode.Q))
+                {
+                    if (hand.hand[0] != null)
+                    {
+                        hand.hand[0].toggleSelected();
+                        hand.updateHandType();
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.W))
+                {
+                    if (hand.hand[1] != null)
+                    {
+                        hand.hand[1].toggleSelected();
+                        hand.updateHandType();
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    if (hand.hand[2] != null)
+                    {
+                        hand.hand[2].toggleSelected();
+                        hand.updateHandType();
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.R))
+                {
+                    if (hand.hand[3] != null)
+                    {
+                        hand.hand[3].toggleSelected();
+                        hand.updateHandType();
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.T))
+                {
+                    if (hand.hand[4] != null)
+                    {
+                        hand.hand[4].toggleSelected();
+                        hand.updateHandType();
+                    }
+                }
+                if (Input.GetKeyDown(KeyCode.Tab))
+                {
+                    if (hand.hand[4] != null)
+                    {
+                        hand.hand[4].toggleSelected();
+                    }
+                    if (hand.hand[3] != null)
+                    {
+                        hand.hand[3].toggleSelected();
+                    }
+                    if (hand.hand[2] != null)
+                    {
+                        hand.hand[2].toggleSelected();
+                    }
+                    if (hand.hand[1] != null)
+                    {
+                        hand.hand[1].toggleSelected();
+                    }
+                    if (hand.hand[0] != null)
+                    {
+                        hand.hand[0].toggleSelected();
+                    }
+                    hand.updateHandType();
+                }
+                if (Input.GetKeyDown(KeyCode.Space) && currPlayCD <= 0)
+                {
+                    PhotonView handView = hand.GetComponent<PhotonView>();
+                    handView.RPC("RPC_PlayHand", RpcTarget.AllBuffered);
+                    currPlayCD = playCD;
+                }
+                currPlayCD -= Time.deltaTime;
+                currComboScoreDecreaseCD -= Time.deltaTime;
+                if (currComboScoreDecreaseCD < 0)
+                {
+                    comboScore = Mathf.Max(0, comboScore * (1 - comboScorePercentDecrease) - comboScoreFlatDecrease);
+                    smm.updateStyleMeter(currComboString);
+                    currComboScoreDecreaseCD = comboScoreDecreaseCD;
+                }
             }
         }
         attackedThisFrame = false;
+    }
+
+    private void isAIPlayHand()
+    {
+        ai.playHand();
     }
 }

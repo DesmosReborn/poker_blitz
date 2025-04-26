@@ -524,7 +524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hand: {fileID: 8670272607733104266}
-  maxHP: 500
+  maxHP: 100000
   playCD: 1.2
   comboScore: 0
   comboFThreshold: 0
@@ -553,6 +553,7 @@ MonoBehaviour:
   view: {fileID: 5400844996860508900}
   myCamera: {fileID: 6091791871468534669}
   myUI: {fileID: 1648221638359876359}
+  isAI: 0
 --- !u!212 &9136058818485097681
 SpriteRenderer:
   m_ObjectHideFlags: 0

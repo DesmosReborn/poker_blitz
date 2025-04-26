@@ -21,10 +21,10 @@ public class CollisionManager : MonoBehaviourPun
     public void ResolveAttackCollision(AttackScript attackA, AttackScript attackB)
     {
         // Only allow the owner of one of the attacks to resolve (e.g., lowest viewID owner)
-        if (!attackA.photonView.IsMine && !attackB.photonView.IsMine) return;
+        if (!attackA.photonView.IsMine && !attackB.photonView.IsMine && !attackA.isAIControlled && !attackB.isAIControlled) return;
 
         // Consistently resolve only from one side
-        if (attackA.photonView.ViewID > attackB.photonView.ViewID) return;
+        if (attackA.photonView.ViewID > attackB.photonView.ViewID && (!attackA.isAIControlled && !attackB.isAIControlled)) return;
 
         float aPower = attackA.currPower;
         float bPower = attackB.currPower;
@@ -56,7 +56,7 @@ public class CollisionManager : MonoBehaviourPun
     }
     public void ResolvePlayerHit(PlayerScript player, AttackScript attack)
     {
-        if (!attack.photonView.IsMine) return; // Only the attack owner should resolve
+        if (!attack.photonView.IsMine && !attack.isAIControlled) return; // Only the attack owner should resolve
 
         float damage = attack.currPower;
 

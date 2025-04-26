@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] private GameObject Player1Prefab;
     [SerializeField] private GameObject Player2Prefab;
+    [SerializeField] private bool isSinglePlayer = false;
 
     // Start is called before the first frame update
     void Start()
@@ -23,6 +24,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.Instantiate(Player1Prefab.name, new Vector3(0, -7.5f, 0), Quaternion.identity);
+
+            if (isSinglePlayer) {
+                PhotonNetwork.Instantiate(Player2Prefab.name, new Vector3(0, 7.5f, 0), Quaternion.Euler(0, 0, 180));
+            }
         }
         else
         {

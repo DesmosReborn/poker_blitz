@@ -208,40 +208,13 @@ MonoBehaviour:
   cards: []
   power: 0
   currPower: 0
-  attackedThisFrame: 0
-  highCardMult: 1
-  onePairMult: 5
-  twoPairMult: 20
-  threeKindMult: 30
-  straightMult: 75
-  flushMult: 75
-  fullHouseMult: 150
-  fourKindMult: 175
-  straightFlushMult: 300
-  highCardBase: 0
-  onePairBase: 15
-  twoPairBase: 40
-  threeKindBase: 70
-  straightBase: 125
-  flushBase: 150
-  fullHouseBase: 250
-  fourKindBase: 275
-  straightFlushBase: 500
-  highCardComboScore: 1
-  onePairComboScore: 5
-  twoPairComboScore: 30
-  threeKindComboScore: 40
-  straightComboScore: 65
-  flushComboScore: 70
-  fullHouseComboScore: 125
-  fourKindComboScore: 150
-  straightFlushComboScore: 300
   baseMoveSpeed: 3
   initialMoveSpeed: 3
   decayRate: 0
   cardSpawnVFX: {fileID: 7080980048330685962, guid: adefe7303707c6f4687d7c0a9e9c937b, type: 3}
   dmgUI: {fileID: 8061656200512834283}
   view: {fileID: 5210584862475040024}
+  isAIControlled: 0
 --- !u!114 &5210584862475040024
 MonoBehaviour:
   m_ObjectHideFlags: 0

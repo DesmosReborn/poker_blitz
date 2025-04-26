@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 49
+  controlID: 41
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 50
+  controlID: 42
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -174,7 +174,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 50}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 51
+  controlID: 43
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -238,23 +238,23 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: e4eafeff
-      m_LastClickedID: -70940
-      m_ExpandedIDs: e4eafeffbef0feffc0f0feff12f2feff92f9feffc6fffeff5a07ffffa007ffffb80affffd80affffe80affff2615ffff7a16ffff161dffff5e1dffff7620ffff9620ffffa620ffffe824ffffa82bffff4a40ffff7043ffff004affff484affff6c4dffff944dffffac4dffff4856ffff005effff3662ffffb26fffff4276ffff8a76ffffa679ffffc679ffffd679ffff9291ffff58a6fffff2adffff38aeffff52b1ffff72b1ffff82b1ffffbeb9ffff04baffff26bdffff4ebdffff66bdfffffabeffffccdeffff16dfffff68e3ffff88e3ffff98e3ffff12ecffff5eecffffb0f0ffffd0f0ffffe0f0ffffe8faffff549900006499000086b30000ccbf0000
+      m_SelectedIDs: ca7c0000
+      m_LastClickedID: 0
+      m_ExpandedIDs: f8cfffffccd5ffffbcf8ffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: BloomCameraP2
-        m_OriginalName: BloomCameraP2
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: -71108
+        m_UserData: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_ClientGUIView: {fileID: 5}
       m_SearchString: 
@@ -642,9 +642,9 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: -244, y: 10}
+      snapOffset: {x: 631.5, y: 10}
       snapOffsetDelta: {x: 0, y: 0}
-      snapCorner: 1
+      snapCorner: 0
       id: UnityEditor.SceneViewCameraOverlay
       index: 11
       layout: 4
@@ -743,7 +743,7 @@ MonoBehaviour:
       sizeOverriden: 0
     m_OverlaysVisible: 1
   m_WindowGUID: cc27987af1a868c49b0894db9c0f5429
-  m_Gizmos: 1
+  m_Gizmos: 0
   m_OverrideSceneCullingMask: 6917529027641081856
   m_SceneIsLit: 1
   m_SceneLighting: 1
@@ -752,9 +752,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 2.5953524, y: -0.779957, z: 0.27093315}
+    m_Target: {x: -0.11596541, y: 1.8396833, z: 0.05488651}
     speed: 2
-    m_Value: {x: 2.5953524, y: -0.779957, z: 0.27093315}
+    m_Value: {x: -0.11596541, y: 1.8396833, z: 0.05488651}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -804,9 +804,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 17.094994
+    m_Target: 7.6895947
     speed: 2
-    m_Value: 17.094994
+    m_Value: 7.6895947
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -1021,24 +1021,24 @@ MonoBehaviour:
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 139.5}
-    m_SelectedIDs: a6990000
-    m_LastClickedID: 39334
-    m_ExpandedIDs: 00000000e8780000ea780000ec780000ee780000f0780000f2780000f4780000f678000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 28.50174}
+    m_SelectedIDs: 44780000
+    m_LastClickedID: 30788
+    m_ExpandedIDs: 0000000016780000187800001a7800001c7800001e780000207800002278000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: Scenes
-      m_OriginalName: Scenes
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 39334
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 10}
     m_SearchString: 
@@ -1052,7 +1052,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000e8780000ea780000ec780000ee780000f0780000f2780000f4780000f6780000
+    m_ExpandedIDs: 0000000016780000187800001a7800001c7800001e7800002078000022780000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1077,8 +1077,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: e4eafeff
-    m_LastClickedInstanceID: -70940
+    m_SelectedInstanceIDs: ca7c0000
+    m_LastClickedInstanceID: 31946
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: c6230000f80100003c62000044650000f461000000000000d67c0000267e000036c2000034c20000486e000040710000
     m_RenameOverlay:

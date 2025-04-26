@@ -19,11 +19,12 @@ public class DeckScript : MonoBehaviourPun
     private float[] numbers = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };  // 14 = Ace, 11 = Jack, 12 = Queen, 13 = King
 
     [SerializeField] bool addJokers;
+    public bool isAIControlled = false;
 
     // Start is called before the first frame update
     void Start()
     {
-        if (!view.IsMine) return;
+        if (!photonView.IsMine && !isAIControlled) return;
         deck = new List<CardScript>();
         played = new List<CardScript>();
         playerID = this.transform.parent.GetComponent<PlayerScript>().view.ViewID;
@@ -34,14 +35,14 @@ public class DeckScript : MonoBehaviourPun
 
     private void initializeDeck()
     {
-        if (!view.IsMine) return;
+        if (!view.IsMine && !isAIControlled) return;
         foreach (string suit in suits)
         {
             foreach (float number in numbers)
             {
                 GameObject newCard = PhotonNetwork.Instantiate(cardPrefab.name, this.transform.localPosition, Quaternion.identity);
                 PhotonView cardView = newCard.GetComponent<PhotonView>();
-                cardView.RPC("RPC_Initialize", Photon.Pun.RpcTarget.AllBuffered, number, suit, playerID);
+                cardView.RPC("RPC_Initialize", Photon.Pun.RpcTarget.AllBuffered, number, suit, playerID, isAIControlled);
                 photonView.RPC("SetParentRPC", RpcTarget.AllBuffered, cardView.ViewID, photonView.ViewID);
             }
         }
@@ -52,7 +53,7 @@ public class DeckScript : MonoBehaviourPun
             {
                 GameObject joker = PhotonNetwork.Instantiate(cardPrefab.name, this.transform.localPosition, Quaternion.identity);
                 PhotonView jokerView = joker.GetComponent<PhotonView>();
-                jokerView.RPC("RPC_Initialize", Photon.Pun.RpcTarget.AllBuffered, 15f, suit, playerID);
+                jokerView.RPC("RPC_Initialize", Photon.Pun.RpcTarget.AllBuffered, 15f, suit, playerID, isAIControlled);
                 photonView.RPC("SetParentRPC", RpcTarget.AllBuffered, jokerView.ViewID, photonView.ViewID);
             }
         }

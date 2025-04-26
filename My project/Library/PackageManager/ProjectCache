@@ -5,16 +5,16 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638793582900428304
-    m_Hash: 1161075671
+      ticks: 638811201513133867
+    m_Hash: 4143474954
   m_LockFileStatus:
     m_FilePath: C:/Users/kevin/Documents/GitHub/poker_blitz/My project/Packages/packages-lock.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638793582900500089
-    m_Hash: 1862682360
+      ticks: 638811201513241454
+    m_Hash: 547833221
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
 m_LocalPackages:
@@ -22,12 +22,12 @@ m_LocalPackages:
 m_ProjectPath: C:/Users/kevin/Documents/GitHub/poker_blitz/My project/Packages
 m_EditorVersion: 2022.3.16f1 (d2c21f0ef2f1)
 m_ResolvedPackages:
-- packageId: com.unity.burst@1.8.19
+- packageId: com.unity.burst@1.8.21
   testable: 0
   isDirectDependency: 1
-  version: 1.8.19
+  version: 1.8.21
   source: 1
-  resolvedPath: C:\Users\kevin\Documents\GitHub\poker_blitz\My project\Library\PackageCache\com.unity.burst@1.8.19
+  resolvedPath: C:\Users\kevin\Documents\GitHub\poker_blitz\My project\Library\PackageCache\com.unity.burst@1.8.21
   assetPath: Packages/com.unity.burst
   name: com.unity.burst
   displayName: Burst
@@ -177,6 +177,8 @@ m_ResolvedPackages:
     - 1.8.17
     - 1.8.18
     - 1.8.19
+    - 1.8.20
+    - 1.8.21
     compatible:
     - 1.8.11
     - 1.8.12
@@ -187,7 +189,9 @@ m_ResolvedPackages:
     - 1.8.17
     - 1.8.18
     - 1.8.19
-    recommended: 1.8.19
+    - 1.8.20
+    - 1.8.21
+    recommended: 1.8.21
     deprecated: []
   dependencies:
   - name: com.unity.mathematics
@@ -210,13 +214,13 @@ m_ResolvedPackages:
     configSource: 0
   hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 638731397665570000
+  datePublishedTicks: 638797336625580000
   documentationUrl: https://docs.unity3d.com/Packages/com.unity.burst@1.8/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: https://github.cds.internal.unity3d.com/unity/burst.git
-    revision: 6498e90e8843e51fdb3a37b709a1f1e4b86d3e57
+    revision: 941bff0925baa46012a2eff522313c170bf36c7a
     path: 
   unityLifecycle:
     version: 1.8.11
@@ -432,7 +436,7 @@ m_ResolvedPackages:
   - name: com.unity.2d.common
     version: 8.0.2
   - name: com.unity.burst
-    version: 1.8.19
+    version: 1.8.21
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.modules.jsonserialize
@@ -565,13 +569,15 @@ m_ResolvedPackages:
     - 3.0.31
     - 3.0.34
     - 3.0.35
+    - 3.0.36
     compatible:
     - 3.0.27
     - 3.0.28
     - 3.0.31
     - 3.0.34
     - 3.0.35
-    recommended: 3.0.35
+    - 3.0.36
+    recommended: 3.0.36
     deprecated: []
   dependencies:
   - name: com.unity.ext.nunit
@@ -937,12 +943,12 @@ m_ResolvedPackages:
     deprecationMessage: 
   isDeprecated: 0
   deprecationMessage: 
-- packageId: com.unity.textmeshpro@3.0.6
+- packageId: com.unity.textmeshpro@3.0.9
   testable: 0
   isDirectDependency: 1
-  version: 3.0.6
+  version: 3.0.9
   source: 1
-  resolvedPath: C:\Users\kevin\Documents\GitHub\poker_blitz\My project\Library\PackageCache\com.unity.textmeshpro@3.0.6
+  resolvedPath: C:\Users\kevin\Documents\GitHub\poker_blitz\My project\Library\PackageCache\com.unity.textmeshpro@3.0.9
   assetPath: Packages/com.unity.textmeshpro
   name: com.unity.textmeshpro
   displayName: TextMeshPro
@@ -951,7 +957,7 @@ m_ResolvedPackages:
     email: 
     url: 
   category: Text Rendering
-  type: asset
+  type: assets
   description: 'TextMeshPro is the ultimate text solution for Unity. It''s the perfect
     replacement for Unity''s UI Text and the legacy Text Mesh.
 
@@ -1120,13 +1126,13 @@ m_ResolvedPackages:
     configSource: 0
   hideInEditor: 1
   isAssetStorePackage: 0
-  datePublishedTicks: 637547111200000000
-  documentationUrl: 
+  datePublishedTicks: 638515173480000000
+  documentationUrl: https://docs.unity3d.com/Packages/com.unity.textmeshpro@3.0/manual/index.html
   hasRepository: 1
   repository:
     type: git
     url: https://github.cds.internal.unity3d.com/unity/com.unity.textmeshpro.git
-    revision: 01e57e3b7de18af9dfe9baaa0a0ff5cc4765c899
+    revision: 0af193626b4f76795f7cb6c9b0f55389d0e4b1d6
     path: 
   unityLifecycle:
     version: 3.0.6
@@ -3578,6 +3584,7 @@ m_ResolvedPackages:
     - 7.1.0
     - 7.1.1
     - 7.1.2
+    - 7.2.0
     - 8.0.0-pre.3
     - 8.0.0-pre.4
     - 8.0.0
@@ -3634,7 +3641,7 @@ m_ResolvedPackages:
   - name: com.unity.2d.common
     version: 8.0.2
   - name: com.unity.burst
-    version: 1.8.19
+    version: 1.8.21
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.modules.jsonserialize
@@ -3850,6 +3857,7 @@ m_ResolvedPackages:
     - 6.0.7
     - 6.0.8
     - 6.0.9
+    - 6.1.0
     - 7.0.0-pre.3
     - 7.0.0-pre.4
     - 7.0.0
@@ -3891,7 +3899,7 @@ m_ResolvedPackages:
   - name: com.unity.2d.common
     version: 8.0.2
   - name: com.unity.burst
-    version: 1.8.19
+    version: 1.8.21
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.modules.jsonserialize
@@ -4093,6 +4101,7 @@ m_ResolvedPackages:
     - 7.0.5
     - 7.0.6
     - 7.0.7
+    - 7.1.0
     - 8.0.0-pre.4
     - 8.0.0-pre.5
     - 8.0.0
@@ -4135,7 +4144,7 @@ m_ResolvedPackages:
   - name: com.unity.2d.common
     version: 8.0.2
   - name: com.unity.burst
-    version: 1.8.19
+    version: 1.8.21
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.modules.jsonserialize
@@ -4428,10 +4437,12 @@ m_ResolvedPackages:
     - 1.1.6
     - 1.1.7
     - 1.1.8
+    - 1.1.9
     - 1.2.0
     - 1.2.1
     - 1.2.2
     - 1.2.3
+    - 1.2.4
     compatible:
     - 1.0.1
     - 1.1.0
@@ -4443,6 +4454,7 @@ m_ResolvedPackages:
     - 1.1.6
     - 1.1.7
     - 1.1.8
+    - 1.1.9
     recommended: 1.0.1
     deprecated: []
   dependencies:
@@ -4458,7 +4470,7 @@ m_ResolvedPackages:
   - name: com.unity.2d.common
     version: 8.0.2
   - name: com.unity.burst
-    version: 1.8.19
+    version: 1.8.21
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.modules.jsonserialize
@@ -4639,6 +4651,7 @@ m_ResolvedPackages:
     - 6.0.6
     - 6.0.7
     - 6.0.8
+    - 6.1.0
     - 7.0.0-pre.3
     - 7.0.0-pre.4
     - 7.0.0
@@ -4664,6 +4677,7 @@ m_ResolvedPackages:
     - 9.0.6
     - 9.0.7
     - 9.1.0
+    - 11.0.0
     compatible:
     - 8.0.2
     - 8.0.3
@@ -4684,7 +4698,7 @@ m_ResolvedPackages:
     version: 1.0.0
   resolvedDependencies:
   - name: com.unity.burst
-    version: 1.8.19
+    version: 1.8.21
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.modules.jsonserialize
@@ -4821,6 +4835,7 @@ m_ResolvedPackages:
     - 2.5.1
     - 2.5.2
     - 2.5.3
+    - 2.5.7
     - 2.6.0-exp.2
     compatible:
     - 1.2.4
@@ -4861,7 +4876,7 @@ m_ResolvedPackages:
     version: 1.1.31
   resolvedDependencies:
   - name: com.unity.burst
-    version: 1.8.19
+    version: 1.8.21
   - name: com.unity.mathematics
     version: 1.2.6
   - name: com.unity.modules.jsonserialize

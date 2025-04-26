@@ -5,6 +5,12 @@ using UnityEngine.UI;
 using Photon.Pun;
 using TMPro;
 using Photon.Realtime;
+using UnityEngine.SceneManagement;
+
+public static class GameMode
+{
+    public static bool IsSinglePlayer = false;
+}
 
 public class RoomManager : MonoBehaviourPunCallbacks
 {
@@ -14,6 +20,8 @@ public class RoomManager : MonoBehaviourPunCallbacks
 
     public void createRoom()
     {
+        GameMode.IsSinglePlayer = false;
+        PhotonNetwork.OfflineMode = false;
         PhotonNetwork.CreateRoom(createInput.text);
     }
 
@@ -21,15 +29,49 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnectedAndReady)
         {
+            GameMode.IsSinglePlayer = false;
+            PhotonNetwork.OfflineMode = false;
             PhotonNetwork.JoinRoom(joinInput.text);
         }
+    }
+
+    IEnumerator SwitchToOfflineModeAndStart()
+    {
+        if (PhotonNetwork.IsConnected)
+        {
+            PhotonNetwork.Disconnect();
+
+            // Wait until disconnected
+            while (PhotonNetwork.IsConnected || PhotonNetwork.NetworkClientState != ClientState.Disconnected)
+            {
+                yield return null;
+            }
+        }
+
+        // Now it's safe to go offline
+        GameMode.IsSinglePlayer = true; // Set the game mode to single player
+        PhotonNetwork.OfflineMode = true;
+        PhotonNetwork.CreateRoom("SinglePlayerRoom"); // or JoinOrCreateRoom
+    }
+
+
+    public void joinSingePlayer()
+    {
+        StartCoroutine(SwitchToOfflineModeAndStart());
     }
 
     public override void OnJoinedRoom()
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            PhotonNetwork.LoadLevel("GameScene");
+            if (GameMode.IsSinglePlayer)
+            {
+                SceneManager.LoadScene("SinglePlayerScene");
+            }
+            else
+            {
+                SceneManager.LoadScene("GameScene");
+            }
         }
     }
     public override void OnJoinRoomFailed(short returnCode, string message)
