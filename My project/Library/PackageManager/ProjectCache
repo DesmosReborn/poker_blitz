@@ -5,16 +5,16 @@ m_ProjectFiles:
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638811201513133867
-    m_Hash: 4143474954
+      ticks: 638819853678528508
+    m_Hash: 3059030333
   m_LockFileStatus:
     m_FilePath: C:/Users/kevin/Documents/GitHub/poker_blitz/My project/Packages/packages-lock.json
     m_PathExists: 1
     m_ContentTrackingEnabled: 1
     m_ModificationDate:
       serializedVersion: 2
-      ticks: 638811201513241454
-    m_Hash: 547833221
+      ticks: 638819853678548795
+    m_Hash: 1837590171
 m_EmbeddedPackageManifests:
   m_ManifestsStatus: {}
 m_LocalPackages:
@@ -329,6 +329,7 @@ m_ResolvedPackages:
     - 2.5.2
     - 2.6.0
     - 2.7.1
+    - 2.8.1
     compatible:
     - 2.2.0
     - 2.3.1
@@ -338,6 +339,7 @@ m_ResolvedPackages:
     - 2.5.2
     - 2.6.0
     - 2.7.1
+    - 2.8.1
     recommended: 2.2.0
     deprecated: []
   dependencies: []

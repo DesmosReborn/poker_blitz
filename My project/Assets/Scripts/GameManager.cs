@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     void Start()
     {
         StartCoroutine(InitializePlayer());
+        Debug.Log("Current room name: " + PhotonNetwork.CurrentRoom.Name);
+
     }
 
     IEnumerator InitializePlayer()

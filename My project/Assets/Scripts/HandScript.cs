@@ -147,7 +147,7 @@ public class HandScript : MonoBehaviourPun
                 selected.Add(hand[i]);
             }
         }
-        handTypeUI.text = getHandType(selected);
+        handTypeUI.text = HandValueManager.Instance.getHandTypeString(selected);
     }
 
     private string getHandType(List<CardScript> cards)

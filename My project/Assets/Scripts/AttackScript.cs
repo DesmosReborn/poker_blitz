@@ -188,7 +188,7 @@ public class AttackScript : MonoBehaviourPun
 
     private float calculateHandStrength()
     {
-        float handStrength = 1;
+        float handStrength = 0;
         foreach (CardScript card in cards)
         {
             handStrength += card.value;
@@ -237,7 +237,7 @@ public class AttackScript : MonoBehaviourPun
             player.updateComboScore(fourKindComboScore);
             return fourKindBase;
         }
-        if (maxCount == 3 && rankCounts.Count == 2)
+        if (IsFullHouse(rankCounts))
         {
             player.updateComboScore(fullHouseComboScore);
             return fullHouseBase;
@@ -273,6 +273,18 @@ public class AttackScript : MonoBehaviourPun
     }
 
     // ----------- Helper Methods -----------
+
+    private bool IsFullHouse(Dictionary<int, int> rankCounts)
+    {
+        // Sort by count descending
+        var counts = rankCounts.Values.OrderByDescending(c => c).ToList();
+
+        // Must be at least 2 distinct ranks
+        if (counts.Count < 2) return false;
+
+        // Check for exactly one triplet and one pair using 5 total cards
+        return counts[0] == 3 && counts[1] == 2 && counts.Take(2).Sum() == 5;
+    }
 
     private bool CheckFlush(List<string> suits, int jokerCount)
     {

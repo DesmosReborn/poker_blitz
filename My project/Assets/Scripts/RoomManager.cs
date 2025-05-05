@@ -22,7 +22,12 @@ public class RoomManager : MonoBehaviourPunCallbacks
     {
         GameMode.IsSinglePlayer = false;
         PhotonNetwork.OfflineMode = false;
-        PhotonNetwork.CreateRoom(createInput.text);
+        RoomOptions options = new RoomOptions();
+        options.MaxPlayers = 2;           // ✅ Set this to how many players you want
+        options.IsVisible = true;
+        options.IsOpen = true;
+
+        PhotonNetwork.CreateRoom(createInput.text, options);
     }
 
     public void joinRoom()
